@@ -36,8 +36,7 @@ h1{
   .first-row,
   .second-row,
   .third-row,
-  .fourth-row,
-  .conflict
+  .fourth-row
   {
     display: inline-block;
     width: 100%;

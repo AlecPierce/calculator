@@ -7,8 +7,6 @@ import { Component, OnInit } from '@angular/core';
 })
 export class CalculatorComponent implements OnInit {
 
-  hero = 'Windstorm';
-
   constructor() { }
 
   ngOnInit(): void {
