@@ -1,0 +1,11 @@
+type Calculation @model @auth(rules: [{allow: public}]) {
+  id: ID!
+  result: Float
+  Users: [User] @connection(keyName: "byCalculation", fields: ["id"])
+}
+
+type User @model @auth(rules: [{allow: public}]) @key(name: "byCalculation", fields: ["calculationID"]) {
+  id: ID!
+  calculationID: ID
+}
+ 
