@@ -22,7 +22,7 @@ export class CalculatorComponent implements OnInit {
   }
 
   number(value: number): void {
-    if(this.showResult) {
+    if (this.showResult) {
       this.clear();
     }
     this.displayedInputs.push(value.toString());
