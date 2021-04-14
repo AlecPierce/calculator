@@ -177,6 +177,7 @@ export class CalculatorComponent implements OnInit {
     this.displayedInputs = [];
     this.showResult = false;
     this.result = 0;
+    this.displayedResults = [];
   }
 
 }
