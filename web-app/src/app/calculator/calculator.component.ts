@@ -18,6 +18,7 @@ export class CalculatorComponent implements OnInit {
   operatorCount: number = 0;
   decimalCount: number = 0;
   negativeCount: number = 0;
+  numberCount: number = 0;
 
   constructor() { }
 
@@ -27,16 +28,22 @@ export class CalculatorComponent implements OnInit {
   number(value: number): void {
     if (this.showResult) {
       this.clear();
-    } else {
-      this.operatorCount = 0;
+    } else if (this.operatorCount === 1) {
       this.decimalCount = 0;
+      this.operatorCount = 0;
+      this.negativeCount = 0;
     }
+    this.numberCount++;
     this.displayedInputs.push(value.toString());
     this.inputs.push(value.toString());
   }
 
   decimal(): void {
+    if(this.showResult) {
+      this.clear();
+    }
     this.decimalCount++;
+    this.numberCount = 0;
     if(this.decimalCount > 1) {
       window.alert("Using more than one decimal point in succession");
       this.clear();
@@ -49,37 +56,60 @@ export class CalculatorComponent implements OnInit {
   operator(operator: string): void {
     this.operatorCount++;
     this.negativeCount = 0;
-    if(this.operatorCount > 1) {
-      window.alert("Using more than one operator in succession");
-      this.clear();
-      return;
-    }
+    this.decimalCount = 0;
     if (this.showResult) {
       this.showResult = false;
       this.inputs.push(this.result.toString());
       this.displayedInputs.push(this.result.toString());
+    } else if(this.operatorCount > 1) {
+      window.alert("Using more than one operator in succession");
+      this.clear();
+      return;
     }
-    if(operator === "%") {
-      this.inputs.push("%");
-      this.displayedInputs.push("/");
-    } else {
-      this.inputs.push(operator);
-      this.displayedInputs.push(operator);
+    if (this.numberCount > 0 && this.operatorCount === 1) {
+      this.decimalCount = 0;
+      if(operator === "%") {
+        this.inputs.push("%");
+        this.displayedInputs.push("/");
+      } else {
+        this.inputs.push(operator);
+        this.displayedInputs.push(operator);
+      }
+    } else if (!this.showResult && this.numberCount < 1) {
+      this.operatorCount = 0;
     }
   }
 
   negative(): void {
-    this.negativeCount++;
-    if(this.negativeCount > 1 || (this.negativeCount > 1 && this.operatorCount > 1)) {
+    this.decimalCount = 0;
+    if (this.showResult) {
+      this.clear();
+    }
+    if (this.negativeCount === 1 && this.numberCount > 0) {
+      window.alert("Using negative incorrectly");
+      this.clear();
+      return;
+    } else if (this.showResult && this.operatorCount < 1) {
+      this.showResult = false;
+      this.inputs.push(this.result.toString());
+      this.displayedInputs.push(this.result.toString());
+    } else if(this.negativeCount > 1 || (this.negativeCount > 1 && this.operatorCount > 1) ||
+        (this.negativeCount > 1 && this.decimalCount > 1)) {
       window.alert("Using more than one negative in succession");
       this.clear();
       return;
     }
+    this.negativeCount++;
     this.inputs.push("_");
     this.displayedInputs.push("(-)");
   }
 
   equals(): void {
+    if ((this.negativeCount||this.operatorCount) !== 0) {
+      window.alert("Unable to proceed with calculation, using a negative, operator, or decimal incorrectly");
+      this.clear();
+      return;
+    }
     this.decipher();
   }
 
@@ -122,39 +152,25 @@ export class CalculatorComponent implements OnInit {
 
   private calculate(constants: string[], operator: string): void {
     if (operator == "+") {
-      if (this.hasDecimals(constants)) {
-        this.result = parseFloat(constants[0]) + parseFloat(constants[1]);
-      } else {
-        this.result = parseInt(constants[0]) + parseInt(constants[1]);
-      }
+        this.result = Number(constants[0]) + Number(constants[1]);
     }
     if (operator == "*") {
-      if (this.hasDecimals(constants)) {
-        this.result = parseFloat(constants[0]) * parseFloat(constants[1]);
-      } else {
         this.result = Number(constants[0]) * Number(constants[1]);
-      }
     }
     if (operator == "-") {
-      if (this.hasDecimals(constants)) {
-        this.result = parseFloat(constants[0]) - parseFloat(constants[1]);
-      } else {
-        this.result = parseInt(constants[0]) - parseInt(constants[1]);
-      }
+        this.result = Number(constants[0]) - Number(constants[1]);
     }
     if (operator == "%") {
-      if (parseFloat(constants[1]) === 0) {
+      if (Number(constants[1]) === 0) {
         window.alert("Can't divide by 0");
         this.clear();
         return;
-      } else if (this.hasDecimals(constants)) {
-        this.result = parseFloat(constants[0]) / parseFloat(constants[1]);
       } else {
-        this.result = parseInt(constants[0]) / parseInt(constants[1]);
+        this.result = Number(constants[0]) / Number(constants[1]);
       }
     } else if (operator == "") {
       this.clearInputsAndShowResult();
-      this.result = parseFloat(constants[0]);
+      this.result = Number(constants[0]);
     }
     this.clearInputsAndShowResult();
     this.displayedResults.push(this.result);
@@ -175,13 +191,7 @@ export class CalculatorComponent implements OnInit {
     this.operatorCount = 0;
     this.decimalCount = 0;
     this.negativeCount = 0;
-  }
-
-  hasDecimals(constants: string[]): boolean {
-    if(this.decimalRegex.test(constants[0]) || this.decimalRegex.test(constants[1])) {
-      return true;
-    }
-    return false;
+    this.numberCount = 0;
   }
 
 }
