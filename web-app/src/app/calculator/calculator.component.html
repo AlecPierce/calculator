@@ -1,31 +1,43 @@
-    <div class="container">
-      <div class="header">Calculator</div>
-      <input type="text" class="result">
-      <div class="first-row">
-        <input type="button" name="" value="CLEAR" class="global">
+<div class="container">
+  <div type="text" class="result" id="result">
+    <div *ngIf="showResult; then thenBlock else elseBlock"></div>
+    <ng-template #thenBlock>
+      <div *ngFor="let displayedResult of displayedResults">
+        <span>{{displayedResult}}</span>
       </div>
-      <div class="second-row">
-        <input type="button" name="" value="7" class="global">
-        <input type="button" name="" value="8" class="global">
-        <input type="button" name="" value="9" class="global">
-        <input type="button" name="" value="/" class="global">
-      </div>
-      <div class="third-row">
-        <input type="button" name="" value="4" class="global">
-        <input type="button" name="" value="5" class="global">
-        <input type="button" name="" value="6" class="global">
-        <input type="button" name="" value="*" class="global">
-      </div>
-      <div class="fourth-row">
-        <input type="button" name="" value="1" class="global">
-        <input type="button" name="" value="2" class="global">
-        <input type="button" name="" value="3" class="global">
-        <input type="button" name="" value="-" class="global">
-      </div>
-      <div class="fifth-row">
-          <input type="button" name="" value="0" class="global">
-          <input type="button" name="" value="." class="global">
-          <input type="button" name="" value="=" class="global">
-          <input type="button" name="" value="+" class="global">
-      </div>
-    </div>
+    </ng-template>
+    <ng-template #elseBlock>
+      <span *ngFor="let displayedInput of displayedInputs">
+        <span>{{displayedInput}}</span>
+      </span>
+    </ng-template>
+  </div>
+  <div class="first-row">
+    <input type="button" name="" value="CLEAR" class="global" (click)="clear()">
+    <input type="button" name="" value="(-)" class="global" (click)="negative()">
+  </div>
+  <div class="second-row">
+    <input type="button" name="7" value="7" class="global" (click)="number(7)">
+    <input type="button" name="8" value="8" class="global" (click)="number(8)">
+    <input type="button" name="9" value="9" class="global" (click)="number(9)">
+    <input type="button" name="/" value="/" class="global" (click)="operator('%')">
+  </div>
+  <div class="third-row">
+    <input type="button" name="4" value="4" class="global" (click)="number(4)">
+    <input type="button" name="5" value="5" class="global" (click)="number(5)">
+    <input type="button" name="6" value="6" class="global" (click)="number(6)">
+    <input type="button" name="*" value="*" class="global" (click)="operator('*')">
+  </div>
+  <div class="fourth-row">
+    <input type="button" name="1" value="1" class="global" (click)="number(1)">
+    <input type="button" name="2" value="2" class="global" (click)="number(2)">
+    <input type="button" name="3" value="3" class="global" (click)="number(3)">
+    <input type="button" name="-" value="-" class="global" (click)="operator('-')">
+  </div>
+  <div class="fifth-row">
+    <input type="button" name="0" value="0" class="global" (click)="number(0)">
+    <input type="button" name="." value="." class="global" (click)="decimal()">
+    <input type="button" name="=" value="=" class="global" (click)="equals()">
+    <input type="button" name="+" value="+" class="global" (click)="operator('+')">
+  </div>
+</div>
