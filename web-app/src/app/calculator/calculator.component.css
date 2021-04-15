@@ -10,14 +10,14 @@ h1{
   .container{
     margin: auto;
     width: 25%;
-    padding: 10px;
+    padding: 50px;
     border: 1px solid #f2f2f2;
     -webkit-box-shadow: 1px 1px 4px 0px rgba(176,176,176,1);
        -moz-box-shadow: 1px 1px 4px 0px rgba(176,176,176,1);
             box-shadow: 1px 1px 4px 0px rgba(176,176,176,1);
     background-color: #fff;
-    height: 450px;
     background-color: #F8F8F8;
+    height: auto;
   }
   .header{
     padding: 10px;

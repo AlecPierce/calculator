@@ -11,10 +11,13 @@ export class CalculatorComponent implements OnInit {
   displayedInputs: string[] = [];
   equation: string[] = [];
   isDecimal: boolean[] = [];
-  decimalRegex: RegExp = /[.]/g
+  decimalRegex: RegExp = /[.]/
   result: number = 0;
   displayedResults: number[] = [];
   showResult: boolean = false;
+  operatorCount: number = 0;
+  decimalCount: number = 0;
+  negativeCount: number = 0;
 
   constructor() { }
 
@@ -24,54 +27,56 @@ export class CalculatorComponent implements OnInit {
   number(value: number): void {
     if (this.showResult) {
       this.clear();
+    } else {
+      this.operatorCount = 0;
+      this.decimalCount = 0;
     }
     this.displayedInputs.push(value.toString());
     this.inputs.push(value.toString());
   }
 
   decimal(): void {
+    this.decimalCount++;
+    if(this.decimalCount > 1) {
+      window.alert("Using more than one decimal point in succession");
+      this.clear();
+      return;
+    }
     this.inputs.push(".");
     this.displayedInputs.push(".");
   }
 
-  sum(): void {
+  operator(operator: string): void {
+    this.operatorCount++;
+    this.negativeCount = 0;
+    if(this.operatorCount > 1) {
+      window.alert("Using more than one operator in succession");
+      this.clear();
+      return;
+    }
     if (this.showResult) {
       this.showResult = false;
       this.inputs.push(this.result.toString());
       this.displayedInputs.push(this.result.toString());
     }
-    this.inputs.push("+");
-    this.displayedInputs.push("+");
+    if(operator === "%") {
+      this.inputs.push("%");
+      this.displayedInputs.push("/");
+    } else {
+      this.inputs.push(operator);
+      this.displayedInputs.push(operator);
+    }
   }
 
-  subtract(): void {
-    if (this.showResult) {
-      this.showResult = false;
-      this.inputs.push(this.result.toString());
-      this.displayedInputs.push(this.result.toString());
+  negative(): void {
+    this.negativeCount++;
+    if(this.negativeCount > 1 || (this.negativeCount > 1 && this.operatorCount > 1)) {
+      window.alert("Using more than one negative in succession");
+      this.clear();
+      return;
     }
-    this.inputs.push("-");
-    this.displayedInputs.push("-");
-  }
-
-  multiply(): void {
-    if (this.showResult) {
-      this.showResult = false;
-      this.inputs.push(this.result.toString());
-      this.displayedInputs.push(this.result.toString());
-    }
-    this.inputs.push("*");
-    this.displayedInputs.push("*");
-  }
-
-  divide(): void {
-    if (this.showResult) {
-      this.showResult = false;
-      this.inputs.push(this.result.toString());
-      this.displayedInputs.push(this.result.toString());
-    }
-    this.inputs.push("%");
-    this.displayedInputs.push("/");
+    this.inputs.push("_");
+    this.displayedInputs.push("(-)");
   }
 
   equals(): void {
@@ -79,36 +84,24 @@ export class CalculatorComponent implements OnInit {
   }
 
   decipher(): void {
-    let numberRegex = /[0123456789]/
-    let operatorRegex = /\+|\*|\-|\%/
+    let numberRegex = /[0123456789]/;
+    let operatorRegex = /\+|\*|\-|\%/;
     var hasPreceedingNumber = false;
     var isDecimal = false;
     var constants = [];
     var operator = "";
     var constant = "";
     var lastNumber = "";
-    var operatorCount = 0;
-    var exit = false;
     this.inputs.forEach(number => {
       if (numberRegex.test(number)) {
         lastNumber = number;
         constant = constant + number;
         hasPreceedingNumber = true;
-        operatorCount = 0;
       } else if (operatorRegex.test(number)) {
         constants.push(constant);
         constant = "";
         operator = number;
         isDecimal = false;
-        operatorCount = operatorCount + 1;
-        if (operatorCount > 1) {
-          window.alert("Using more than one operator in succession");
-          this.result = 0;
-          this.showResult = false;
-          this.inputs = [];
-          this.displayedInputs = [];
-          exit = true;
-        }
       } else if (this.decimalRegex.test(number)) {
         isDecimal = true;
         if (hasPreceedingNumber) {
@@ -116,35 +109,34 @@ export class CalculatorComponent implements OnInit {
         } else {
           constant = "0" + number;
         }
+      } else {
+        constant = constant + "-";
       }
     });
     if (isDecimal) {
       constant = constant + lastNumber;
     }
-    if (exit) {
-      return;
-    }
     constants.push(constant);
     this.calculate(constants, operator);
   }
 
-  calculate(constants: string[], operator: string): void {
+  private calculate(constants: string[], operator: string): void {
     if (operator == "+") {
-      if (this.decimalRegex.test(constants[0]) || this.decimalRegex.test(constants[1])) {
+      if (this.hasDecimals(constants)) {
         this.result = parseFloat(constants[0]) + parseFloat(constants[1]);
       } else {
         this.result = parseInt(constants[0]) + parseInt(constants[1]);
       }
     }
     if (operator == "*") {
-      if (this.decimalRegex.test(constants[0]) || this.decimalRegex.test(constants[1])) {
+      if (this.hasDecimals(constants)) {
         this.result = parseFloat(constants[0]) * parseFloat(constants[1]);
       } else {
-        this.result = parseInt(constants[0]) * parseInt(constants[1]);
+        this.result = Number(constants[0]) * Number(constants[1]);
       }
     }
     if (operator == "-") {
-      if (this.decimalRegex.test(constants[0]) || this.decimalRegex.test(constants[1])) {
+      if (this.hasDecimals(constants)) {
         this.result = parseFloat(constants[0]) - parseFloat(constants[1]);
       } else {
         this.result = parseInt(constants[0]) - parseInt(constants[1]);
@@ -155,21 +147,23 @@ export class CalculatorComponent implements OnInit {
         window.alert("Can't divide by 0");
         this.clear();
         return;
-      } else if (this.decimalRegex.test(constants[0]) || this.decimalRegex.test(constants[1])) {
+      } else if (this.hasDecimals(constants)) {
         this.result = parseFloat(constants[0]) / parseFloat(constants[1]);
       } else {
         this.result = parseInt(constants[0]) / parseInt(constants[1]);
       }
     } else if (operator == "") {
-      this.inputs = [];
-      this.displayedInputs = [];
-      this.showResult = true;
+      this.clearInputsAndShowResult();
       this.result = parseFloat(constants[0]);
     }
+    this.clearInputsAndShowResult();
+    this.displayedResults.push(this.result);
+  }
+
+  private clearInputsAndShowResult() {
     this.inputs = [];
     this.displayedInputs = [];
     this.showResult = true;
-    this.displayedResults.push(this.result);
   }
 
   clear(): void {
@@ -178,6 +172,16 @@ export class CalculatorComponent implements OnInit {
     this.showResult = false;
     this.result = 0;
     this.displayedResults = [];
+    this.operatorCount = 0;
+    this.decimalCount = 0;
+    this.negativeCount = 0;
+  }
+
+  hasDecimals(constants: string[]): boolean {
+    if(this.decimalRegex.test(constants[0]) || this.decimalRegex.test(constants[1])) {
+      return true;
+    }
+    return false;
   }
 
 }
